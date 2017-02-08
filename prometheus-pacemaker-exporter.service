@@ -1,0 +1,10 @@
+[Unit]
+Description=Prometheus Pacemaker exporter
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/prometheus-pacemaker-exporter.py
+
+[Install]
+WantedBy=multi-user.target
