@@ -43,22 +43,22 @@ class PacemakerCollector(object):
         root = ET.fromstring(xml.decode('utf-8'))
 
         summary = root.find('summary')
-        yield GaugeMetricFamily('last_update', 'Last update time of cluster info',
+        yield GaugeMetricFamily('pacemaker_last_update', 'Last update time of cluster info',
                                 value=p_time(summary.find('last_update').attrib['time']))
-        yield GaugeMetricFamily('last_change', 'Last CIB change time',
+        yield GaugeMetricFamily('pacemaker_last_change', 'Last CIB change time',
                                 value=p_time(summary.find('last_change').attrib['time']))
-        yield GaugeMetricFamily('dc_present', 'Whether the cluster has an active DC',
+        yield GaugeMetricFamily('pacemaker_dc_present', 'Whether the cluster has an active DC',
                                 value=p_bool(summary.find('current_dc').attrib['present']))
-        yield GaugeMetricFamily('dc_with_quorum', 'Whether the cluster has quorum',
+        yield GaugeMetricFamily('pacemaker_dc_with_quorum', 'Whether the cluster has quorum',
                                 value=p_bool(summary.find('current_dc').attrib['with_quorum']))
-        yield GaugeMetricFamily('nodes_configured', 'Number of configured nodes',
+        yield GaugeMetricFamily('pacemaker_nodes_configured', 'Number of configured nodes',
                                 value=int(summary.find('nodes_configured').attrib['number']))
-        yield GaugeMetricFamily('resources_configured', 'Number of configured resources',
+        yield GaugeMetricFamily('pacemaker_resources_configured', 'Number of configured resources',
                                 value=int(summary.find('resources_configured').attrib['number']))
-        yield GaugeMetricFamily('stonith_enabled', 'Whether STONITH is enabled',
+        yield GaugeMetricFamily('pacemaker_stonith_enabled', 'Whether STONITH is enabled',
                                 value=p_bool(summary.find('cluster_options').attrib['stonith-enabled']))
         
-        NGauge = lambda n, t: GaugeMetricFamily(n, t, labels=['node'])
+        NGauge = lambda n, t: GaugeMetricFamily('pacemaker_' + n, t, labels=['node'])
         node_metrics = {
             'id':         (int,     NGauge('node_id',           'Node ID')),
             'online':     (p_bool,  NGauge('node_online',       'Node is online')),
@@ -81,10 +81,10 @@ class PacemakerCollector(object):
         for parser, metric in node_metrics.values():
             yield metric
 
-        attrib_value = GaugeMetricFamily('node_attribute_value', 'Node attribute',
-                                         labels=['node', 'name'])
-        attrib_expected = GaugeMetricFamily('node_attribute_expected', 'Node attribute',
-                                            labels=['node', 'name'])
+        attrib_value = GaugeMetricFamily('pacemaker_node_attribute_value',
+                                         'Node attribute', labels=['node', 'name'])
+        attrib_expected = GaugeMetricFamily('pacemaker_node_attribute_expected',
+                                            'Node attribute', labels=['node', 'name'])
         all_nodes = set()
         for node in root.findall('./node_attributes/node'):
             all_nodes.add(node.attrib['name'])
@@ -97,9 +97,9 @@ class PacemakerCollector(object):
         yield attrib_value
         yield attrib_expected
 
-        RGauge = lambda n, t: GaugeMetricFamily(n, t, labels=['id', 'instance'])
+        RGauge = lambda n, t: GaugeMetricFamily('pacemaker_' + n, t, labels=['id', 'instance'])
         
-        resource_node = GaugeMetricFamily('resource_node',
+        resource_node = GaugeMetricFamily('pacemaker_resource_node',
                                           'Whether a resource is running on each node',
                                           labels=['id', 'instance', 'node'])
 
