@@ -31,8 +31,7 @@ def p_bool(b):
     return 1 if b in ('true', '1') else 0
 
 def get_xml():
-    return subprocess.run(["crm_mon", "-X"], check=True,
-                          stdout=subprocess.PIPE).stdout
+    return subprocess.check_output(["crm_mon", "-X"])
 
 class PacemakerCollector(object):
     def __init__(self, args):
@@ -164,8 +163,7 @@ class MainHandler(MetricsHandler):
             self.send_error(500, str(e))
 
     def send_html(self):
-        html = subprocess.run(["crm_mon", "-w"], check=True,
-                              stdout=subprocess.PIPE).stdout
+        html = subprocess.check_output(["crm_mon", "-w"])
         html = html.split(b'\n\n',1)[1]
         html = html.replace(b"</body>", b'<p><a href="/metrics">Metrics</a> <a href="/xml">XML</a></p>\n</body>')
         html = html.replace(b"</head>", b'<style>body { font-family: sans-serif; }</style>')
